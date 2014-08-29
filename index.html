@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html ng-app>
+	<head>
+		<title>Random Pokemon! </title>
+		<link href="index.css" type = "text/css" rel = "stylesheet">
+		<script type="text/javascript" src="./angular.min.js"></script>
+		<script type="text/javascript" src = "./sasstore.min.js"></script>
+	
+		<script>
+			function pokemans($scope) {
+
+				$scope.text = "A wild pokemon appeared!";
+				$scope.store = new SASStore({id: "pokemonStore", length: 649, itemSize: 1});
+
+				$scope.getPokemon = function(n) {
+					var n2 = n-1; // because zero-indexed
+					$scope.store.setItem(n2, "1"); // replace 0 with 1 if we haven't caught it already
+				}
+
+				$scope.getProgress = function() {
+					var count = $scope.store.countOccurrencesOf("0"); // no need to say $scope for var count b/c we don't use it in the divs
+					return "You've got " + count + "/649 pokemon left to catch!";
+				}
+
+
+				$scope.winCheck = function() {
+					if ($scope.store.countOccurrencesOf("0") == 0) {
+						return true;
+					}
+					else {
+						return false;
+					}
+				}
+
+				$scope.getPokemonString = function(randnum) {
+					var n;
+					if(randnum < 10) {
+						n = '00' + String(randnum);
+					} 
+					else if (randnum < 100) {
+						n = '0' + String(randnum);
+					} 
+					else {
+						n = String(randnum);
+					}
+					return n; 
+				}
+
+				$scope.shinyCheck = function() {
+					var n = Math.floor(Math.random()*8193);
+					if (n == 3) {
+						return "s";
+					} 
+					else {
+						return "i";
+					}
+				}
+
+				$scope.reset = function() {
+					$scope.store.reset();
+					$scope.isWinner = $scope.winCheck();
+				}
+
+				$scope.update = function() {
+					$scope.num = (Math.floor(Math.random()*649) +1);
+					$scope.pokemonString = $scope.getPokemonString($scope.num);
+					console.log($scope.pokemonString);
+					$scope.getPokemon($scope.num);
+					$scope.isWinner = $scope.winCheck();
+					$scope.shiny = $scope.shinyCheck();
+					$scope.isShiny = function() {
+						if ($scope.shiny == "s") {
+							return true;
+						}
+						else {
+							return false;
+						}
+					}
+				}
+
+				$scope.update();
+			}
+		</script>
+	</head>
+
+	<body>
+		<div ng-controller="pokemans" align=center>
+			<div>{{text}}</div>
+			<div>{{getProgress()}}</div>
+			<div ng-show="isShiny()">GASP! YOU GOT A SHINY POKEMON!</div>
+			<div ng-show="isWinner">CONGRATULATIONS - YOU ARE NOW A POKEMON MASTER!</div>
+			<div>
+				<img ng-src="http://sprites.pokecheck.org/{{shiny}}/{{pokemonString}}.gif" height="150px"></img>
+			</div>
+			<button ng-click="update()">new</button>
+			<button ng-click="reset()">reset</button>
+		</div>
+	</body>
+</html>
